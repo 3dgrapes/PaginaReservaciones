@@ -1,0 +1,14 @@
+Para correr el server y ver la pagina:
+python manage.py runserver 
+
+Si haces creas tablas nuevas en models.py:
+python manager.py makameigrations
+python manager.py migrate
+Si nomas haces cambios en las tablas (como los __str__), solo guarda el archivo y refresca la página
+
+Para crear superusuarios (cuentas de admin):
+python manage.py createsuperuser
+
+casanova
+davidcasanova@gmail.com
+Django1234

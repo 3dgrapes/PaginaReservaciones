@@ -1,13 +1,27 @@
-Para correr el server y ver la pagina:
-python manage.py runserver 
+Si es la primera vez que abres esto (clonaste el repo):
+1. Crear el venv: python -m venv [nombre1]
+2. Activar el venv: [nombre1]\Scripts\activate
+3. Instalar dependencias: pip install -r requirements.txt
+   (NO usar django-admin startproject, el proyecto ya existe)
 
-Si haces creas tablas nuevas en models.py:
-python manager.py makameigrations
-python manager.py migrate
-Si nomas haces cambios en las tablas (como los __str__), solo guarda el archivo y refresca la página
+Cada vez que inicies el IDE o reinicies tu computadora:
+[nombreProyecto]\Scripts\activate
+
+Para correr el server y ver la página:
+python manage.py runserver
+
+Si creas tablas nuevas en models.py:
+python manage.py makemigrations
+python manage.py migrate
+
+Si nomas haces cambios menores (como los __str__), solo guarda el archivo y refresca la página
 
 Para crear superusuarios (cuentas de admin):
 python manage.py createsuperuser
+
+Si instalas una librería nueva (ej. algo con pip install):
+pip freeze > requirements.txt
+y haz commit de ese archivo para que el equipo lo tenga actualizado
 
 casanova
 davidcasanova@gmail.com

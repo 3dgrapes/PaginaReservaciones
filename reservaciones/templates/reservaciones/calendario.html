@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendario de Reservaciones</title>
+
+    <script src="{% static 'reservaciones/fullcalendar/scheduler.js' %}"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #calendar {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="calendar"></div>
+
+    <div class="modal fade" id="modalEvento" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitulo"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Fecha inicio:</strong> <span id="modalInicio"></span></p>
+                    <p><strong>Fecha fin:</strong> <span id="modalFin"></span></p>
+                    <p><strong>Asistentes esperados:</strong> <span id="modalAsistentes"></span></p>
+                    <p><strong>Estado:</strong> <span id="modalEstado"></span></p>
+                    <p><strong>Requerimientos:</strong> <span id="modalRequerimientos"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var calendar;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                initialView: 'resourceTimeGridDay',
+                slotMinTime: '08:00:00',
+                slotMaxTime: '19:00:00',
+                resourceAreaWidth: '15%',
+                slotMinWidh: 60,
+                contentHeight: 'auto',
+                resourceAreaHeaderContent: 'Salas',
+                resources: '/salas/',
+                events: '/calendario/',
+                editable: false,
+                
+                eventClick: function(info) {
+                    fetch('/evento/' + info.event.id + '/')
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('modalTitulo').textContent = data.title;
+                            document.getElementById('modalInicio').textContent = data.start;
+                            document.getElementById('modalFin').textContent = data.end;
+                            document.getElementById('modalAsistentes').textContent = data.asistentes;
+                            document.getElementById('modalEstado').textContent = data.estado;
+                            document.getElementById('modalRequerimientos').textContent = data.requerimientos || 'Sin requerimientos';
+
+                            var modal = new bootstrap.Modal(document.getElementById('modalEvento'));
+                            modal.show();
+                        });
+                },
+
+                datesSet: function(info) {
+                    var fecha = info.start.toISOString().split('T')[0];
+                    actualizarListaEventos(fecha);
+                }
+
+
+            });
+
+                
+
+            calendar.render();
+        });
+    </script>
+
+    <div style="max-width: 700px; margin: 60px auto 30px auto;">
+    <h3>Editar Reservación</h3>
+    <form id="formEditar">
+        <div class="mb-3">
+            <label class="form-label">Evento</label>
+            <select class="form-select" id="selectEvento" required>
+                <option value="">-- Selecciona un evento --</option>
+                {% for evento in eventos %}
+                <option value="{{ evento.id }}">{{ evento.nombre_evento }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nueva fecha y hora de inicio</label>
+            <input type="datetime-local" class="form-control" id="inputInicio" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nueva fecha y hora de fin</label>
+            <input type="datetime-local" class="form-control" id="inputFin" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Salas</label><br>
+            {% for sala in salas %}
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" value="{{ sala.id }}" id="sala{{ sala.id }}" name="salas">
+                <label class="form-check-label" for="sala{{ sala.id }}">{{ sala.nombre }}</label>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Color del evento</label>
+            <input type="color" class="form-control form-control-color" id="inputColor" value="#3788d8">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('selectEvento').addEventListener('change', function() {
+    var eventoId = this.value;
+    if (!eventoId) return;
+
+    fetch('/evento/' + eventoId + '/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('inputInicio').value = data.start_iso;
+            document.getElementById('inputFin').value = data.end_iso;
+            document.getElementById('inputColor').value = data.color;
+            document.querySelectorAll('input[name="salas"]').forEach(function(checkbox) {
+                checkbox.checked = data.salas.includes(parseInt(checkbox.value));
+            });
+        });
+});
+
+document.getElementById('formEditar').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var eventoId = document.getElementById('selectEvento').value;
+    var inicio = document.getElementById('inputInicio').value;
+    var fin = document.getElementById('inputFin').value;
+    var color = document.getElementById('inputColor').value;  
+
+    fetch('/actualizar-evento/' + eventoId + '/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            start: inicio,
+            end: fin,
+            color: color  
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.mensaje);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert('Reservación actualizada correctamente');
+        calendar.refetchEvents();
+    })
+    .catch(error => {
+        alert(error.message);
+    });
+});
+
+function actualizarListaEventos(fecha) {
+    fetch('/evento_dia/' + fecha + '/')
+        .then(response => response.json())
+        .then(data => {
+            var select = document.getElementById('selectEvento');
+            select.innerHTML = '<option value="">-- Selecciona un evento --</option>';
+            data.forEach(function(evento) {
+                var option = document.createElement('option');
+                option.value = evento.id;
+                option.textContent = evento.nombre_evento;
+                select.appendChild(option);
+            });
+        });
+}
+</script>
+
+</body>
+</html>

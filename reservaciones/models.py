@@ -43,6 +43,7 @@ class Evento(models.Model):
     descripcion = models.TextField()
     requerimientos = models.TextField(blank=True)
     salas = models.ManyToManyField(Sala)
+    color = models.CharField(max_length=7, default='#3788d8')
 
     def __str__(self):
         return self.nombre_evento

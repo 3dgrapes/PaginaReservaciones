@@ -16,7 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from reservaciones.views import eventos_json, salas_json, evento_detalle, eventos_del_dia, agenda, actualizar_evento
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('calendario/', eventos_json, name="calendario"),
+    path('salas/', salas_json, name="sala"),
+    path('agenda/', agenda, name="agenda"),
+    path('actualizar-evento/<int:evento_id>/', actualizar_evento, name="actualizar_evento"),
+    path('evento/<int:evento_id>/', evento_detalle, name="evento_detalle"),
+    path('evento_dia/<str:fecha>/', eventos_del_dia, name="filtrar_evento_dia"),
 ]

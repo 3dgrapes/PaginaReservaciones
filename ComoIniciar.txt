@@ -23,6 +23,22 @@ Si instalas una librería nueva (ej. algo con pip install):
 pip freeze > requirements.txt
 y haz commit de ese archivo para que el equipo lo tenga actualizado
 
+Si es la primera vez que trabajas en la parte de FullCalendar (o jalas la rama vista-calendario):
+1. Instalar Node.js (LTS) desde nodejs.org si no lo tienes
+   Verificar con: node -v / npm -v
+2. Instalar las librerías de FullCalendar:
+   npm install @fullcalendar/core @fullcalendar/resource @fullcalendar/resource-timeline @fullcalendar/interaction @fullcalendar/daygrid
+   npm install fullcalendar-scheduler
+3. Copiar el archivo combinado a la carpeta de estáticos (PowerShell):
+   copy node_modules\fullcalendar-scheduler\index.global.min.js reservaciones\static\reservaciones\fullcalendar\scheduler.js
+
+Nota: node_modules/ NO se sube a GitHub, cada quien lo genera localmente con npm install
+
+Nota sobre FullCalendar: estamos usando la versión Premium en modo evaluación 
+(gratis para uso académico/demo). Si la maestra quiere usarlo en producción real 
+después de la presentación, hay que revisar el tema de licencia comercial.
+
+
 casanova
 davidcasanova@gmail.com
 Django1234
